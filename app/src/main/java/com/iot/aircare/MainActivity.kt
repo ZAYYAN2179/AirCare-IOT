@@ -383,41 +383,6 @@ fun AirCareScreen() {
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Info Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF2196F3))
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Informasi",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                InfoItem("✓ ESP32 mengirim data setiap 2 detik")
-                InfoItem("✓ Data tersimpan di Firebase Realtime Database")
-                InfoItem("✓ MQ-135 mendeteksi kualitas udara (CO₂, NH₃, benzene)")
-                InfoItem("✓ DHT11 mengukur suhu dan kelembaban")
-            }
-        }
-
         Spacer(modifier = Modifier.height(40.dp))
     }
 }
@@ -481,14 +446,4 @@ fun MetricCard(
             }
         }
     }
-}
-
-@Composable
-fun InfoItem(text: String) {
-    Text(
-        text = text,
-        fontSize = 12.sp,
-        color = Color(0xFF424242),
-        modifier = Modifier.padding(vertical = 3.dp)
-    )
 }
