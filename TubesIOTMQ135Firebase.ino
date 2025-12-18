@@ -68,7 +68,7 @@ void setup() {
   pinMode(LED_KUNING_PIN, OUTPUT);
   pinMode(LED_MERAH_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(PIR_PIN, INPUT);  // PIR
+  pinMode(PIR_PIN, INPUT);
 
   digitalWrite(BUZZER_PIN, LOW);
 
@@ -228,7 +228,7 @@ void loop() {
     snprintf(
       line2,
       sizeof(line2),
-      "MQ:%4d P:%c    ",  // ⬅ padding spasi PENTING
+      "MQ:%4d P:%c    ",
       sensorValue,
       pirDetected ? '1' : '0');
   }
