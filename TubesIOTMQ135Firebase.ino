@@ -147,25 +147,75 @@ void loop() {
     (kondisi == 0) ? "AMAN" :
     (kondisi == 1) ? "WARN" : "BAHAYA";
 
-  // LCD
+   // ================= LCD DISPLAY MODE =================
+  char line1[17];
+  char line2[17];
+
+  if (kondisi == 0) {
+    // ===== NORMAL (LED HIJAU) =====
+    snprintf(
+      line1,
+      sizeof(line1),
+      "MQ:%4d  ST:OK",
+      sensorValue
+    );
+
+    if (dhtValid) {
+      snprintf(
+        line2,
+        sizeof(line2),
+        "T:%2dC H:%2d%% P:%c",
+        (int)temperature,
+        (int)humidity,
+        pirDetected ? '1' : '0'
+      );
+    } else {
+      snprintf(
+        line2,
+        sizeof(line2),
+        "T:--C H:--%% P:%c",
+        pirDetected ? '1' : '0'
+      );
+    }
+
+  } else if (kondisi == 1) {
+    // ===== PERINGATAN (LED KUNING) =====
+    snprintf(
+      line1,
+      sizeof(line1),
+      "WASPADA ASAP !!"
+    );
+
+    snprintf(
+      line2,
+      sizeof(line2),
+      "MQ:%4d P:%c",
+      sensorValue,
+      pirDetected ? '1' : '0'
+    );
+
+  } else {
+    // ===== BAHAYA (LED MERAH) =====
+    snprintf(
+      line1,
+      sizeof(line1),
+      "BAHAYA ASAP !! "
+    );
+
+    snprintf(
+      line2,
+      sizeof(line2),
+      "MQ:%4d P:%c",
+      sensorValue,
+      pirDetected ? '1' : '0'
+    );
+  }
+
   lcd.setCursor(0, 0);
-  lcd.print("MQ:");
-  lcd.print(sensorValue);
-  lcd.print(" ");
-  lcd.print(statusText);
-  lcd.print("  ");
+  lcd.print(line1);
 
   lcd.setCursor(0, 1);
-  if (pirDetected)
-    lcd.print("PIR:GERAK ");
-  else
-    lcd.print("PIR:AMAN  ");
-
-  if (dhtValid) {
-    lcd.print("T:");
-    lcd.print(temperature, 0);
-    lcd.print("C");
-  }
+  lcd.print(line2);
 
   // SERIAL
   Serial.print("MQ:");
