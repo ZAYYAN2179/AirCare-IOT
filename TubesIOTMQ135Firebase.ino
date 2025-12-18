@@ -19,24 +19,24 @@ const char* DATABASE_URL =
 
 // ================= PIN =================
 const int MQ135_ANALOG_PIN = 36;
-const int PIR_PIN = 27;     // <<< PIR
+const int PIR_PIN = 27;  // <<< PIR
 
 // DHT11
 #define DHTPIN 14
 #define DHTTYPE DHT11
 
 // LED & Buzzer
-const int LED_HIJAU_PIN  = 19;
+const int LED_HIJAU_PIN = 19;
 const int LED_KUNING_PIN = 18;
-const int LED_MERAH_PIN  = 5;
-const int BUZZER_PIN     = 4;
+const int LED_MERAH_PIN = 5;
+const int BUZZER_PIN = 4;
 
 // ================= LCD I2C =================
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // ================= THRESHOLD =================
 int AMBANG_PERINGATAN = 2400;
-int AMBANG_BAHAYA     = 3000;
+int AMBANG_BAHAYA = 3000;
 
 // ================= KALIBRASI =================
 const unsigned long BASELINE_CAL_MS = 8000UL;
@@ -55,6 +55,10 @@ bool pirDetected = false;
 // ================= OBJECT =================
 DHT dht(DHTPIN, DHTTYPE);
 
+// ================= TEST MODE =================
+bool testMode = false;
+int simulatedMQ = 0;
+
 // =================================================
 void setup() {
   Serial.begin(115200);
@@ -64,7 +68,7 @@ void setup() {
   pinMode(LED_KUNING_PIN, OUTPUT);
   pinMode(LED_MERAH_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(PIR_PIN, INPUT);   // PIR
+  pinMode(PIR_PIN, INPUT);  // PIR
 
   digitalWrite(BUZZER_PIN, LOW);
 
@@ -103,7 +107,7 @@ void setup() {
 
   baselineADC = (cnt > 0) ? sum / cnt : 0;
   AMBANG_PERINGATAN = baselineADC + 600;
-  AMBANG_BAHAYA     = baselineADC + 1200;
+  AMBANG_BAHAYA = baselineADC + 1200;
 
   lcd.clear();
 }
@@ -120,8 +124,33 @@ int readSmoothedADC() {
 
 // =================================================
 void loop() {
+  // ================= SERIAL TEST INPUT =================
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+
+    if (cmd == "TEST") {
+      testMode = true;
+      Serial.println(">> TEST MODE AKTIF");
+    }
+
+    else if (cmd == "REAL") {
+      testMode = false;
+      Serial.println(">> REAL SENSOR MODE");
+    }
+
+    else if (cmd.startsWith("MQ=")) {
+      simulatedMQ = cmd.substring(3).toInt();
+      Serial.println(">> SIMULATED MQ: " + String(simulatedMQ));
+    }
+  }
+
   // SENSOR
-  sensorValue = readSmoothedADC();
+  if (testMode) {
+    sensorValue = simulatedMQ;
+  } else {
+    sensorValue = readSmoothedADC();
+  }
   humidity = dht.readHumidity();
   temperature = dht.readTemperature();
   pirDetected = digitalRead(PIR_PIN);
@@ -139,15 +168,15 @@ void loop() {
     kondisi_sebelumnya = kondisi;
   }
 
-  digitalWrite(LED_HIJAU_PIN,  kondisi == 0);
+  digitalWrite(LED_HIJAU_PIN, kondisi == 0);
   digitalWrite(LED_KUNING_PIN, kondisi == 1);
-  digitalWrite(LED_MERAH_PIN,  kondisi == 2);
+  digitalWrite(LED_MERAH_PIN, kondisi == 2);
 
   String statusText =
-    (kondisi == 0) ? "AMAN" :
-    (kondisi == 1) ? "WARN" : "BAHAYA";
+    (kondisi == 0) ? "AMAN" : (kondisi == 1) ? "WARN"
+                                             : "BAHAYA";
 
-   // ================= LCD DISPLAY MODE =================
+  // ================= LCD DISPLAY MODE =================
   char line1[17];
   char line2[17];
 
@@ -157,8 +186,7 @@ void loop() {
       line1,
       sizeof(line1),
       "MQ:%4d  ST:OK",
-      sensorValue
-    );
+      sensorValue);
 
     if (dhtValid) {
       snprintf(
@@ -167,15 +195,13 @@ void loop() {
         "T:%2dC H:%2d%% P:%c",
         (int)temperature,
         (int)humidity,
-        pirDetected ? '1' : '0'
-      );
+        pirDetected ? '1' : '0');
     } else {
       snprintf(
         line2,
         sizeof(line2),
         "T:--C H:--%% P:%c",
-        pirDetected ? '1' : '0'
-      );
+        pirDetected ? '1' : '0');
     }
 
   } else if (kondisi == 1) {
@@ -183,32 +209,28 @@ void loop() {
     snprintf(
       line1,
       sizeof(line1),
-      "WASPADA ASAP !!"
-    );
+      "WASPADA ASAP !!");
 
     snprintf(
       line2,
       sizeof(line2),
       "MQ:%4d P:%c",
       sensorValue,
-      pirDetected ? '1' : '0'
-    );
+      pirDetected ? '1' : '0');
 
   } else {
     // ===== BAHAYA (LED MERAH) =====
     snprintf(
       line1,
       sizeof(line1),
-      "BAHAYA ASAP !! "
-    );
+      "BAHAYA ASAP !! ");
 
     snprintf(
       line2,
       sizeof(line2),
       "MQ:%4d P:%c",
       sensorValue,
-      pirDetected ? '1' : '0'
-    );
+      pirDetected ? '1' : '0');
   }
 
   lcd.setCursor(0, 0);
