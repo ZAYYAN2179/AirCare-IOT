@@ -185,7 +185,7 @@ void loop() {
     snprintf(
       line1,
       sizeof(line1),
-      "MQ:%4d  ST:OK",
+      "MQ:%4d  ST:OK  ",  // padding spasi
       sensorValue);
 
     if (dhtValid) {
@@ -205,16 +205,16 @@ void loop() {
     }
 
   } else if (kondisi == 1) {
-    // ===== PERINGATAN (LED KUNING) =====
+    // ===== WASPADA (LED KUNING) =====
     snprintf(
       line1,
       sizeof(line1),
-      "WASPADA ASAP !!");
+      "WASPADA ASAP !! ");
 
     snprintf(
       line2,
       sizeof(line2),
-      "MQ:%4d P:%c",
+      "MQ:%4d P:%c    ",  // ⬅ padding spasi PENTING
       sensorValue,
       pirDetected ? '1' : '0');
 
@@ -223,12 +223,12 @@ void loop() {
     snprintf(
       line1,
       sizeof(line1),
-      "BAHAYA ASAP !! ");
+      "BAHAYA ASAP !!  ");
 
     snprintf(
       line2,
       sizeof(line2),
-      "MQ:%4d P:%c",
+      "MQ:%4d P:%c    ",  // ⬅ padding spasi PENTING
       sensorValue,
       pirDetected ? '1' : '0');
   }
