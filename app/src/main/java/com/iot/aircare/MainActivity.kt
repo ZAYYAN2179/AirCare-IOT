@@ -92,6 +92,7 @@ fun AirCareScreen() {
     var humidity by remember { mutableFloatStateOf(0f) }
     var timestamp by remember { mutableLongStateOf(0L) }
     var isConnected by remember { mutableStateOf(false) }
+    var pirDetected by remember { mutableStateOf(false) }
 
     // Color mapping based on status
     fun getStatusColors(s: String): Pair<Color, Color> = when (s.uppercase()) {
@@ -139,6 +140,10 @@ fun AirCareScreen() {
 
                 snapshot.child("humidity").getValue(Double::class.java)?.let {
                     humidity = it.toFloat()
+                }
+
+                snapshot.child("pir").getValue(Boolean::class.java)?.let {
+                    pirDetected = it
                 }
 
                 (snapshot.child("timestamp").getValue(Long::class.java)
@@ -209,6 +214,11 @@ fun AirCareScreen() {
 
         // Main Status Card
         val (statusColor1, statusColor2) = getStatusColors(status)
+        val pirTextColor = if (!pirDetected) {
+            Color(0xFF4CAF50)
+        } else {
+            statusColor1
+        }
         AnimatedVisibility(
             visible = true,
             enter = scaleIn(spring(Spring.DampingRatioMediumBouncy)) + fadeIn(),
@@ -299,6 +309,51 @@ fun AirCareScreen() {
                 color = Color(0xFF4ECDC4),
                 modifier = Modifier.weight(1f)
             )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "SENSOR GERAK (PIR)",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = if (pirDetected)
+                            "AREA TERPANTAU AKTIF"
+                        else
+                            "AREA KOSONG",
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = pirTextColor
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .clip(CircleShape)
+                        .background(pirTextColor)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
